@@ -1,50 +1,100 @@
 # Jira Label Bulk Modify
 
-A Python script for automating the process of adding and removing labels across multiple Jira issues based on JQL queries.
+<div align="center">
 
-## Features
+![Jira](https://img.shields.io/badge/jira-%230A0FFF.svg?style=for-the-badge&logo=jira&logoColor=white)
+![Python](https://img.shields.io/badge/python-3.6+-blue.svg?style=for-the-badge&logo=python&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-green.svg?style=for-the-badge)
 
-- Bulk add and remove labels across multiple Jira issues
-- Select issues using JQL (Jira Query Language) queries
-- Automatically handle rate limiting and API pagination
-- Detailed logging and error handling
-- Progress tracking for resumable operations
-- Batch processing with status tracking
+**A Python tool to automate adding and removing labels across multiple Jira issues using JQL queries.**
 
-## Installation
+</div>
 
-1. Clone the repository:
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Features](#-features)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+- [Usage](#-usage)
+  - [Command Line Options](#command-line-options)
+  - [Input File Format](#input-file-format)
+- [Output](#-output)
+- [Project Structure](#-project-structure)
+- [Development](#-development)
+  - [Testing](#testing)
+- [Security Considerations](#-security-considerations)
+- [Troubleshooting](#-troubleshooting)
+- [License](#-license)
+- [Contributing](#-contributing)
+
+## 🚀 Overview
+
+This tool simplifies managing Jira labels across multiple issues, saving time and ensuring consistency with your labeling system. The script uses the Jira REST API to fetch, update, and track changes to issue labels.
+
+## ✨ Features
+
+- **Bulk Operations** - Add and remove labels across multiple issues simultaneously
+- **JQL Filtering** - Select target issues using Jira Query Language (JQL)
+- **Smart Processing**:
+  - Automatically handles rate limiting
+  - Manages API pagination for large result sets
+  - Skips issues that don't need changes
+- **Resumable Operations** - Progress tracking allows interrupted runs to continue
+- **Batch Processing** - Group operations into logical batches with status tracking
+- **Detailed Reporting** - Comprehensive logs and results files
+
+## 🔧 Prerequisites
+
+- Python 3.6+
+- A Jira account with API access
+- Appropriate permissions to modify issues
+
+## 📥 Installation
+
+1. **Clone the repository**
 
 ```bash
 git clone https://github.com/yourusername/jira-label-bulk-modify.git
 cd jira-label-bulk-modify
 ```
 
-2. Install dependencies:
+2. **Create a virtual environment** (recommended)
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Create a `.env` file in the project root with your Jira credentials:
+4. **Configure your Jira credentials**
 
-```
+Create a `.env` file in the project root:
+
+```ini
 JIRA_BASE_URL=https://your-domain.atlassian.net
 JIRA_EMAIL=your-email@example.com
 JIRA_API_TOKEN=your-api-token
 ```
 
-You can generate an API token from your [Atlassian Account Security Settings](https://id.atlassian.com/manage/api-tokens).
+> 🔑 You can generate an API token from your [Atlassian Account Security Settings](https://id.atlassian.com/manage/api-tokens).
 
-## Usage
+## 🏃‍♂️ Quick Start
 
-### Basic Usage
+1. Create a `jql_queries.json` file with your batch configuration (see [Input File Format](#input-file-format))
+2. Run the script:
 
 ```bash
 python main.py
 ```
 
-This will read `jql_queries.json` in the current directory and process all batches with status "TO DO".
+## 📖 Usage
 
 ### Command Line Options
 
@@ -53,7 +103,7 @@ usage: main.py [-h] [-i INPUT] [-b BATCH] [-d] [-f] [--skip-validation]
 
 Bulk modify Jira issue labels based on JQL queries.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         Path to the input JSON file (default: jql_queries.json)
@@ -70,43 +120,56 @@ Create a `jql_queries.json` file with the following structure:
 
 ```json
 [
-    {
-        "batchName": "Test cases for Wave 3",
-        "add": "NewLabel",
-        "remove": "OldLabel",
-        "query": "issue in (38659,38658,12345)",
-        "status": "TO DO"
-    },
-    {
-        "batchName": "Query with various issue types",
-        "add": ["NRT", "SecondLabel", "ThirdLabel"],
-        "remove": ["SIT", "SecondLabelToRemove"],
-        "query": "project = 'TEST' AND created > -30d",
-        "status": "TO DO"
-    }
+  {
+    "batchName": "Test cases for Wave 3",
+    "add": "NewLabel",
+    "remove": "OldLabel",
+    "query": "issue in (38659,38658,12345)",
+    "status": "TO DO"
+  },
+  {
+    "batchName": "Query with various issue types",
+    "add": ["NRT", "SecondLabel", "ThirdLabel"],
+    "remove": ["SIT", "SecondLabelToRemove"],
+    "query": "project = 'TEST' AND created > -30d",
+    "status": "TO DO"
+  },
+  {
+    "batchName": "High priority issues",
+    "add": ["Priority-High", "NeedsReview"],
+    "remove": [],
+    "query": "priority = High AND status = 'In Progress'",
+    "status": "TO DO"
+  }
 ]
 ```
 
-Where:
-- `batchName`: Name used for logging and output file identification
+**Fields explained:**
+- `batchName`: Descriptive name used for logging and output files
 - `add`: String or array of strings for labels to add
 - `remove`: String or array of strings for labels to remove
-- `query`: JQL query to select issues
+- `query`: JQL query to select target issues
 - `status`: "TO DO" or "DONE" to track progress
 
-## Output
+## 📊 Output
 
 The script generates several output files in the `output` directory:
 
-- Progress files for each batch tracking individual issue status
-- Results files for each batch with detailed operation results
-- A final results file with an overall summary
+- **Progress files** (`progress_BatchName_TIMESTAMP.json`): 
+  - Track individual issue status during processing
+  - Allow for resuming interrupted operations
 
-Log files are saved in the `logs` directory.
+- **Batch results** (`results_BatchName_TIMESTAMP.json`):
+  - Detailed operation results for each batch
+  - Contains success/failure status for each issue
 
-## Development
+- **Final summary** (`final_results_TIMESTAMP.json`):
+  - Overall summary of all batch operations
+  - Aggregated statistics on successful/failed/skipped issues
 
-### Project Structure
+Detailed logs are saved to the `logs` directory with timestamps.
+
+## 📁 Project Structure
 
 ```
 jira-label-bulk-modify/
@@ -127,6 +190,8 @@ jira-label-bulk-modify/
 └── main.py                   # Entry point
 ```
 
+## 🛠️ Development
+
 ### Testing
 
 Run unit tests:
@@ -135,16 +200,55 @@ Run unit tests:
 python -m unittest discover tests
 ```
 
-### Security Considerations
+To run integration tests (requires Jira credentials):
+
+```bash
+python -m unittest tests.test_integration
+```
+
+## 🔒 Security Considerations
 
 - Never commit your `.env` file or expose your API token
-- Keep SSL verification enabled (VERIFY_SSL=True) in production environments
+- Keep SSL verification enabled (`VERIFY_SSL=True`) in production environments
 - Use the Jira API token rather than your actual password
+- The script follows Jira API best practices for authentication
 
-## License
+## ❓ Troubleshooting
 
-[MIT License](LICENSE)
+**Common Issues:**
 
-## Contributing
+1. **Rate Limiting Errors**
+   - Increase `RATE_LIMIT_PAUSE` in `.env` file
+   - Consider batch processing during off-peak hours
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+2. **Permission Errors**
+   - Ensure your Jira account has permission to modify the target issues
+   - Check that your API token is correctly configured
+
+3. **Connection Issues**
+   - Verify your network connection
+   - Check that your Jira instance is accessible
+
+For more help, check the logs in the `logs` directory or open an issue on GitHub.
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## 👥 Contributing
+
+Contributions are welcome! Here's how you can contribute:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+Please make sure to update tests as appropriate and follow the existing code style.
+
+---
+
+<div align="center">
+  <p>Made with ❤️ for Jira admins everywhere</p>
+</div>
