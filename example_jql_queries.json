@@ -1,0 +1,30 @@
+[
+    {
+      "batchName": "Test cases for Wave 3-Add and remove single labels",
+      "add": "NewLabel",
+      "remove": "OldLabel",
+      "query": "issue in (38659,38658,12345)",
+      "status": "TO DO"
+    },
+    {
+      "batchName": "Query with various issue types-Add and remove multiple labels at once",
+      "add": ["NRT", "SecondLabel", "ThirdLabel"],
+      "remove": ["SIT", "SecondLabelToRemove"],
+      "query": "project = 'TEST' AND created > -30d",
+      "status": "TO DO"
+    },
+    {
+      "batchName": "High priority issues-Add only",
+      "add": ["Priority-High", "NeedsReview"],
+      "remove": [],
+      "query": "priority = High AND status = 'In Progress'",
+      "status": "TO DO"
+    },
+    {
+      "batchName": "Cleanup deprecated labels-Remove only",
+      "add": [],
+      "remove": ["Deprecated", "OldProcess"],
+      "query": "labels in (Deprecated, OldProcess)",
+      "status": "TO DO"
+    }
+  ]
