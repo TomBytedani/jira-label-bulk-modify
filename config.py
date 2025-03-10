@@ -15,7 +15,7 @@ API_VERSION = os.getenv("API_VERSION", "3")
 
 # Request settings
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "30"))
-RATE_LIMIT_PAUSE = float(os.getenv("RATE_LIMIT_PAUSE", "1"))  # seconds between requests
+RATE_LIMIT_PAUSE = float(os.getenv("RATE_LIMIT_PAUSE", "0.2"))  # seconds between requests
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
 VERIFY_SSL = os.getenv("VERIFY_SSL", "True").lower() in ("true", "1", "t")
 

@@ -113,6 +113,7 @@ options:
   -f, --force           Force processing of batches marked as DONE
   --skip-validation     Skip input validation
 ```
+The speed at which each Edit issue call is made can be modified from the .env file, or directly in the config.py file. Currently it's set as 0.2, but if you encounter API limits, feel free to increase it.
 
 ### Input File Format
 
@@ -149,7 +150,7 @@ Create a `jql_queries.json` file with the following structure:
 - `add`: String or array of strings for labels to add
 - `remove`: String or array of strings for labels to remove
 - `query`: JQL query to select target issues
-- `status`: "TO DO" or "DONE" to track progress
+- `status`: "TO DO" or "DONE" to track progress. "DONE" batches won't be processed by the script.
 
 ## 📊 Output
 
@@ -183,27 +184,7 @@ jira-label-bulk-modify/
 │   ├── input_validator.py    # Input validation 
 │   ├── logger.py             # Logging setup
 │   └── error_handler.py      # Error handling utilities
-├── tests/                    # Test suite
-│   ├── __init__.py
-│   ├── test_integration.py
-│   └── test_unit.py
 └── main.py                   # Entry point
-```
-
-## 🛠️ Development
-
-### Testing
-
-Run unit tests:
-
-```bash
-python -m unittest discover tests
-```
-
-To run integration tests (requires Jira credentials):
-
-```bash
-python -m unittest tests.test_integration
 ```
 
 ## 🔒 Security Considerations
